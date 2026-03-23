@@ -2,8 +2,7 @@
 
 /* ── Constants ── */
 const STORAGE_KEY = 'arun_board_v1';
-const JB_KEY_KEY  = 'arun_jb_key';   // JSONBin master key
-const JB_BIN_KEY  = 'arun_jb_bin';   // JSONBin bin ID
+const JB_BIN_ID   = '69c11b4ab7ec241ddc94b477';
 const JB_BASE     = 'https://api.jsonbin.io/v3';
 
 /* ── In-memory state ── */
@@ -48,21 +47,10 @@ async function init() {
 /* ═══════════════════════════════════════════
    JSONBIN SYNC
 ═══════════════════════════════════════════ */
-function getJbKey() { return localStorage.getItem(JB_KEY_KEY) || ''; }
-function getJbBin() { return localStorage.getItem(JB_BIN_KEY) || ''; }
-
 async function loadRemoteState() {
-  const key = getJbKey();
-  const bin = getJbBin();
-  if (!key || !bin) { updateSyncPill(); return; }
-
   try {
-    const res = await fetch(`${JB_BASE}/b/${bin}/latest`, {
-      headers: { 'X-Master-Key': key }
-    });
-    if (res.status === 401 || res.status === 403) { setSyncStatus('error', 'Key invalid'); return; }
-    if (res.status === 404) { updateSyncPill(); return; }
-    if (!res.ok) { updateSyncPill(); return; }
+    const res = await fetch(`${JB_BASE}/b/${JB_BIN_ID}/latest`);
+    if (!res.ok) { setSyncStatus('error'); return; }
 
     const { record } = await res.json();
     state = Object.assign({ completedTasks: {}, checkedSteps: {}, expandedTasks: [] }, record);
@@ -70,59 +58,21 @@ async function loadRemoteState() {
     render();
     setSyncStatus('synced');
   } catch (e) {
-    updateSyncPill();
+    setSyncStatus('error');
   }
 }
 
 async function syncToJsonBin() {
-  const key = getJbKey();
-  if (!key) { setSyncStatus('no-token'); return; }
-
   setSyncStatus('syncing');
-
-  let bin = getJbBin();
-
   try {
-    if (!bin) {
-      // First time — create a new bin
-      const res = await fetch(`${JB_BASE}/b`, {
-        method: 'POST',
-        headers: {
-          'X-Master-Key': key,
-          'Content-Type': 'application/json',
-          'X-Bin-Name': 'arun-task-board',
-          'X-Bin-Private': 'true',
-        },
-        body: JSON.stringify(state),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        setSyncStatus('error', err.message || res.status);
-        return;
-      }
-      const created = await res.json();
-      bin = created.metadata.id;
-      localStorage.setItem(JB_BIN_KEY, bin);
-      showBinCreated(bin);
-    } else {
-      // Update existing bin
-      const res = await fetch(`${JB_BASE}/b/${bin}`, {
-        method: 'PUT',
-        headers: {
-          'X-Master-Key': key,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(state),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        setSyncStatus('error', err.message || res.status);
-        return;
-      }
-    }
-    setSyncStatus('synced');
+    const res = await fetch(`${JB_BASE}/b/${JB_BIN_ID}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(state),
+    });
+    setSyncStatus(res.ok ? 'synced' : 'error');
   } catch (e) {
-    setSyncStatus('error', e.message);
+    setSyncStatus('error');
   }
 }
 
@@ -132,7 +82,7 @@ function scheduleSync() {
 }
 
 /* ── Sync pill UI ── */
-function setSyncStatus(status, detail) {
+function setSyncStatus(status) {
   const el = document.getElementById('sync-pill');
   if (!el) return;
 
@@ -150,129 +100,14 @@ function setSyncStatus(status, detail) {
     }, 3000);
   } else if (status === 'error') {
     el.textContent = '⚠ Sync failed — tap to retry';
-    el.title = detail || '';
-  } else if (status === 'no-token') {
-    el.textContent = '⚙ Set up sync';
   } else {
     el.textContent = '✓ Synced';
   }
 }
 
-function updateSyncPill() {
-  setSyncStatus(getJbKey() ? 'idle' : 'no-token');
-}
-
-/* ── Token modal ── */
-function showTokenModal(prefill) {
-  if (document.getElementById('token-modal')) return;
-
-  const overlay = document.createElement('div');
-  overlay.id        = 'token-modal';
-  overlay.className = 'modal-overlay';
-  overlay.innerHTML = `
-    <div class="modal-card" id="modal-card">
-      <h3>Cross-device sync</h3>
-      <p>Enter your <strong>JSONBin Master Key</strong> (from jsonbin.io → API Keys) and a <strong>Bin ID</strong> if syncing from another device. Keys are stored only in this browser.</p>
-      <label class="modal-label">Master Key</label>
-      <input type="password" id="jb-key-input" placeholder="$2a$10$…"
-             autocomplete="off" spellcheck="false"
-             value="${esc(prefill || getJbKey())}">
-      <label class="modal-label" style="margin-top:10px">Bin ID <span style="font-weight:400;opacity:.6">(leave blank to create new)</span></label>
-      <input type="text" id="jb-bin-input" placeholder="64a3f…"
-             autocomplete="off" spellcheck="false"
-             value="${esc(getJbBin())}">
-      <div class="modal-btns">
-        <button class="btn-primary" id="save-token-btn">Save &amp; Sync</button>
-        <button class="btn-secondary" id="clear-token-btn">Remove credentials</button>
-        <button class="btn-cancel" id="cancel-token-btn">Cancel</button>
-      </div>
-      <p class="modal-note">Credentials never leave your browser except to call the JSONBin API over HTTPS.</p>
-    </div>`;
-
-  overlay.addEventListener('click', e => {
-    if (e.target === overlay) closeTokenModal();
-  });
-
-  document.body.appendChild(overlay);
-  requestAnimationFrame(() => overlay.classList.add('open'));
-
-  document.getElementById('jb-key-input').focus();
-
-  document.getElementById('save-token-btn').addEventListener('click', () => {
-    const key = document.getElementById('jb-key-input').value.trim();
-    const bin = document.getElementById('jb-bin-input').value.trim();
-    if (!key) return;
-    localStorage.setItem(JB_KEY_KEY, key);
-    if (bin) localStorage.setItem(JB_BIN_KEY, bin);
-    else localStorage.removeItem(JB_BIN_KEY);
-    closeTokenModal();
-    syncToJsonBin();
-  });
-
-  document.getElementById('clear-token-btn').addEventListener('click', () => {
-    localStorage.removeItem(JB_KEY_KEY);
-    localStorage.removeItem(JB_BIN_KEY);
-    closeTokenModal();
-    setSyncStatus('no-token');
-  });
-
-  document.getElementById('cancel-token-btn').addEventListener('click', closeTokenModal);
-}
-
-/* ── Show bin ID after auto-creation ── */
-function showBinCreated(binId) {
-  const existing = document.getElementById('bin-created-modal');
-  if (existing) existing.remove();
-
-  const overlay = document.createElement('div');
-  overlay.id        = 'bin-created-modal';
-  overlay.className = 'modal-overlay';
-  overlay.innerHTML = `
-    <div class="modal-card">
-      <h3>Bin created ✓</h3>
-      <p>Your state is now stored on JSONBin. To sync another device, enter your Master Key <strong>and</strong> this Bin ID in the sync setup:</p>
-      <div class="bin-id-box" id="bin-id-display">${esc(binId)}</div>
-      <p class="modal-note">Tap the Bin ID to copy it.</p>
-      <div class="modal-btns">
-        <button class="btn-primary" id="bin-ok-btn">Got it</button>
-      </div>
-    </div>`;
-
-  document.body.appendChild(overlay);
-  requestAnimationFrame(() => overlay.classList.add('open'));
-
-  document.getElementById('bin-id-display').addEventListener('click', () => {
-    navigator.clipboard.writeText(binId).catch(() => {});
-    document.getElementById('bin-id-display').textContent = 'Copied!';
-    setTimeout(() => {
-      const el = document.getElementById('bin-id-display');
-      if (el) el.textContent = binId;
-    }, 1500);
-  });
-
-  document.getElementById('bin-ok-btn').addEventListener('click', () => {
-    overlay.classList.remove('open');
-    setTimeout(() => overlay.remove(), 200);
-  });
-}
-
-function closeTokenModal() {
-  const el = document.getElementById('token-modal');
-  if (!el) return;
-  el.classList.remove('open');
-  setTimeout(() => el.remove(), 200);
-}
-
 function handleSyncPillClick() {
   const el = document.getElementById('sync-pill');
-  if (!el) return;
-  if (el.className.includes('no-token')) {
-    showTokenModal();
-  } else if (el.className.includes('error')) {
-    syncToJsonBin(); // retry
-  } else {
-    showTokenModal(); // allow credential update
-  }
+  if (el && el.className.includes('error')) syncToJsonBin();
 }
 
 /* ═══════════════════════════════════════════
@@ -292,7 +127,6 @@ function render() {
   const total = data.sections.reduce((n, s) => n + s.tasks.length, 0);
   const done  = Object.keys(state.completedTasks).length;
   const pct   = total ? Math.round(done / total * 100) : 0;
-  const ready = getJbKey();
 
   document.getElementById('app').innerHTML = `
     <header class="app-header">
@@ -309,11 +143,10 @@ function render() {
           </div>
           <div class="header-meta-row">
             <div class="updated-note">Updated: ${esc(data.meta.updated)}</div>
-            <span id="sync-pill"
-                  class="sync-pill ${ready ? 'idle' : 'no-token'}"
+            <span id="sync-pill" class="sync-pill idle"
                   onclick="handleSyncPillClick()"
-                  title="${ready ? 'Tap to manage sync / retry' : 'Tap to set up cross-device sync'}">
-              ${ready ? '✓ Synced' : '⚙ Set up sync'}
+                  title="Cross-device sync via JSONBin">
+              ✓ Synced
             </span>
           </div>
         </div>
