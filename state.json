@@ -1,11 +1,5 @@
 {
-  "completedTasks": {
-    "1": {
-      "sectionId": "urgent",
-      "completedAt": "23 Mar, 16:00",
-      "ts": 1774261856901
-    }
-  },
+  "completedTasks": {},
   "checkedSteps": {},
   "expandedTasks": [
     9
