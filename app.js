@@ -55,24 +55,37 @@ function getToken() {
 }
 
 async function loadRemoteState() {
-  const url =
-    `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/${GH_BRANCH}/${STATE_FILE}` +
-    `?v=${Date.now()}`;
+  const token = getToken();
+  let remote = null;
+
   try {
-    const res = await fetch(url);
-    if (!res.ok) {
-      // state.json not yet created — that's fine, will be created on first save
-      updateSyncPill();
-      return;
+    if (token) {
+      // Use the GitHub API directly — bypasses CDN caching, always returns latest content
+      const res = await fetch(
+        `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${STATE_FILE}`,
+        { headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' } }
+      );
+      if (res.status === 404) { updateSyncPill(); return; } // not created yet
+      if (res.status === 401 || res.status === 403) { setSyncStatus('error', 'Token invalid'); return; }
+      if (!res.ok) { updateSyncPill(); return; }
+      const info = await res.json();
+      remote = JSON.parse(atob(info.content.replace(/\s/g, '')));
+    } else {
+      // No token — raw URL (may lag by CDN cache; token needed for reliable sync)
+      const res = await fetch(
+        `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/${GH_BRANCH}/${STATE_FILE}?v=${Date.now()}`
+      );
+      if (!res.ok) { updateSyncPill(); return; }
+      remote = await res.json();
     }
-    const remote = await res.json();
-    // Remote is source of truth: overwrite local state entirely
-    state = Object.assign({ completedTasks: {}, checkedSteps: {}, expandedTasks: [] }, remote);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    render();
-    setSyncStatus('synced');
+
+    if (remote) {
+      state = Object.assign({ completedTasks: {}, checkedSteps: {}, expandedTasks: [] }, remote);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      render();
+      setSyncStatus('synced');
+    }
   } catch (e) {
-    // Offline or CORS issue — keep local state silently
     updateSyncPill();
   }
 }
