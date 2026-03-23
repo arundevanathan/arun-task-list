@@ -1,9 +1,10 @@
 'use strict';
 
 /* ── Constants ── */
-const STORAGE_KEY = 'arun_board_v1';
-const JB_BIN_ID   = '69c11b4ab7ec241ddc94b477';
-const JB_BASE     = 'https://api.jsonbin.io/v3';
+const STORAGE_KEY    = 'arun_board_v1';
+const JB_BIN_ID      = '69c11b4ab7ec241ddc94b477'; // state (completed, checked, expanded)
+const JB_TASKS_BIN   = '69c11e09aa77b81da90e9b88'; // task definitions
+const JB_BASE        = 'https://api.jsonbin.io/v3';
 
 /* ── In-memory state ── */
 let data        = null;
@@ -26,15 +27,16 @@ async function init() {
     try { Object.assign(state, JSON.parse(saved)); } catch (e) { /* ignore */ }
   }
 
-  // 2. Fetch tasks.json
+  // 2. Fetch task definitions from JSONBin
   try {
-    const res = await fetch('tasks.json?v=' + Date.now());
+    const res = await fetch(`${JB_BASE}/b/${JB_TASKS_BIN}/latest`);
     if (!res.ok) throw new Error('HTTP ' + res.status);
-    data = await res.json();
+    const json = await res.json();
+    data = json.record;
   } catch (e) {
     document.getElementById('app').innerHTML =
       '<div style="color:#e05a4e;padding:2rem;text-align:center;font-size:13px">' +
-      'Failed to load tasks.json: ' + e.message + '</div>';
+      'Failed to load tasks: ' + e.message + '</div>';
     return;
   }
 
