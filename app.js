@@ -1,21 +1,34 @@
 'use strict';
 
-/* ── State ── */
+/* ── Constants ── */
 const STORAGE_KEY = 'arun_board_v1';
-let data = null;
+const TOKEN_KEY   = 'arun_board_token';
+const GH_OWNER    = 'arundevanathan';
+const GH_REPO     = 'arun-task-list';
+const GH_BRANCH   = 'main';
+const STATE_FILE  = 'state.json';
+
+/* ── In-memory state ── */
+let data      = null;
+let syncTimer = null;
+
 let state = {
   completedTasks: {}, // { taskId: { completedAt, sectionId, ts } }
   checkedSteps:   {}, // { taskId: [stepIndex, ...] }
   expandedTasks:  [], // [taskId, ...]
 };
 
-/* ── Boot ── */
+/* ═══════════════════════════════════════════
+   BOOT
+═══════════════════════════════════════════ */
 async function init() {
+  // 1. Load localStorage for instant first render
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
     try { Object.assign(state, JSON.parse(saved)); } catch (e) { /* ignore */ }
   }
 
+  // 2. Fetch tasks.json
   try {
     const res = await fetch('tasks.json?v=' + Date.now());
     if (!res.ok) throw new Error('HTTP ' + res.status);
@@ -27,24 +40,214 @@ async function init() {
     return;
   }
 
+  // 3. Render immediately with local state
   render();
+
+  // 4. Fetch remote state.json — source of truth for cross-device sync
+  await loadRemoteState();
 }
 
-/* ── Persist ── */
+/* ═══════════════════════════════════════════
+   GITHUB SYNC
+═══════════════════════════════════════════ */
+function getToken() {
+  return localStorage.getItem(TOKEN_KEY) || '';
+}
+
+async function loadRemoteState() {
+  const url =
+    `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/${GH_BRANCH}/${STATE_FILE}` +
+    `?v=${Date.now()}`;
+  try {
+    const res = await fetch(url);
+    if (!res.ok) {
+      // state.json not yet created — that's fine, will be created on first save
+      updateSyncPill();
+      return;
+    }
+    const remote = await res.json();
+    // Remote is source of truth: overwrite local state entirely
+    state = Object.assign({ completedTasks: {}, checkedSteps: {}, expandedTasks: [] }, remote);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    render();
+    setSyncStatus('synced');
+  } catch (e) {
+    // Offline or CORS issue — keep local state silently
+    updateSyncPill();
+  }
+}
+
+async function syncToGitHub() {
+  const token = getToken();
+  if (!token) { setSyncStatus('no-token'); return; }
+
+  setSyncStatus('syncing');
+
+  const content = btoa(JSON.stringify(state, null, 2));
+
+  try {
+    // Need current SHA to update existing file
+    let sha = null;
+    const infoRes = await fetch(
+      `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${STATE_FILE}`,
+      { headers: { Authorization: `token ${token}` } }
+    );
+    if (infoRes.ok) {
+      sha = (await infoRes.json()).sha;
+    } else if (infoRes.status === 401 || infoRes.status === 403) {
+      setSyncStatus('error', 'Token invalid or expired');
+      return;
+    }
+    // 404 = file doesn't exist yet → create it (no sha needed)
+
+    const body = { message: 'Update task state', content, branch: GH_BRANCH };
+    if (sha) body.sha = sha;
+
+    const putRes = await fetch(
+      `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${STATE_FILE}`,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `token ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      }
+    );
+
+    if (putRes.ok) {
+      setSyncStatus('synced');
+    } else {
+      const err = await putRes.json().catch(() => ({}));
+      setSyncStatus('error', err.message || putRes.status);
+    }
+  } catch (e) {
+    setSyncStatus('error', e.message);
+  }
+}
+
+function scheduleSync() {
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(syncToGitHub, 800);
+}
+
+/* ── Sync pill UI ── */
+function setSyncStatus(status, detail) {
+  const el = document.getElementById('sync-pill');
+  if (!el) return;
+
+  el.className = 'sync-pill ' + status;
+
+  if (status === 'syncing') {
+    el.innerHTML = '<span class="spin">↻</span> Syncing…';
+  } else if (status === 'synced') {
+    el.textContent = '✓ Synced';
+    setTimeout(() => {
+      if (el.className.includes('synced')) {
+        el.className = 'sync-pill idle';
+        el.textContent = '✓ Synced';
+      }
+    }, 3000);
+  } else if (status === 'error') {
+    el.textContent = '⚠ Sync failed — tap to retry';
+    el.title = detail || '';
+  } else if (status === 'no-token') {
+    el.textContent = '⚙ Set up sync';
+  } else {
+    // idle
+    el.textContent = '✓ Synced';
+  }
+}
+
+function updateSyncPill() {
+  setSyncStatus(getToken() ? 'idle' : 'no-token');
+}
+
+/* ── Token modal ── */
+function showTokenModal(prefill) {
+  if (document.getElementById('token-modal')) return;
+
+  const overlay = document.createElement('div');
+  overlay.id        = 'token-modal';
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal-card" id="modal-card">
+      <h3>Cross-device sync</h3>
+      <p>Enter a GitHub personal access token with <strong>repo</strong> scope. It's stored only in this browser and used to sync your task state to GitHub so any device sees the same board.</p>
+      <input type="password" id="token-input" placeholder="ghp_…"
+             autocomplete="off" spellcheck="false"
+             value="${esc(prefill || getToken())}">
+      <div class="modal-btns">
+        <button class="btn-primary" id="save-token-btn">Save &amp; Sync</button>
+        <button class="btn-secondary" id="clear-token-btn">Remove token</button>
+        <button class="btn-cancel" id="cancel-token-btn">Cancel</button>
+      </div>
+      <p class="modal-note">Token never leaves your browser except to call the GitHub API over HTTPS.</p>
+    </div>`;
+
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) closeTokenModal();
+  });
+
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => overlay.classList.add('open'));
+
+  document.getElementById('token-input').focus();
+
+  document.getElementById('save-token-btn').addEventListener('click', () => {
+    const val = document.getElementById('token-input').value.trim();
+    if (!val) return;
+    localStorage.setItem(TOKEN_KEY, val);
+    closeTokenModal();
+    syncToGitHub();
+  });
+
+  document.getElementById('clear-token-btn').addEventListener('click', () => {
+    localStorage.removeItem(TOKEN_KEY);
+    closeTokenModal();
+    setSyncStatus('no-token');
+  });
+
+  document.getElementById('cancel-token-btn').addEventListener('click', closeTokenModal);
+}
+
+function closeTokenModal() {
+  const el = document.getElementById('token-modal');
+  if (!el) return;
+  el.classList.remove('open');
+  setTimeout(() => el.remove(), 200);
+}
+
+function handleSyncPillClick() {
+  const el = document.getElementById('sync-pill');
+  if (!el) return;
+  if (el.className.includes('no-token')) {
+    showTokenModal();
+  } else if (el.className.includes('error')) {
+    syncToGitHub(); // retry
+  } else {
+    showTokenModal(); // allow token update
+  }
+}
+
+/* ═══════════════════════════════════════════
+   PERSIST (local + remote)
+═══════════════════════════════════════════ */
 function save() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  scheduleSync();
 }
 
-/* ── Render ── */
+/* ═══════════════════════════════════════════
+   RENDER
+═══════════════════════════════════════════ */
 function render() {
   if (!data) return;
 
   const total = data.sections.reduce((n, s) => n + s.tasks.length, 0);
   const done  = Object.keys(state.completedTasks).length;
   const pct   = total ? Math.round(done / total * 100) : 0;
-
-  const sectionsHtml = data.sections.map(renderSection).join('');
-  const completedHtml = done > 0 ? renderCompleted() : '';
+  const tok   = getToken();
 
   document.getElementById('app').innerHTML = `
     <header class="app-header">
@@ -59,20 +262,29 @@ function render() {
             <div class="bar-track"><div class="bar-fill" style="width:${pct}%"></div></div>
             <span class="pct">${pct}%</span>
           </div>
-          <div class="updated-note">Last updated: ${esc(data.meta.updated)}</div>
+          <div class="header-meta-row">
+            <div class="updated-note">Updated: ${esc(data.meta.updated)}</div>
+            <span id="sync-pill"
+                  class="sync-pill ${tok ? 'idle' : 'no-token'}"
+                  onclick="handleSyncPillClick()"
+                  title="${tok ? 'Tap to manage sync / retry' : 'Tap to set up cross-device sync'}">
+              ${tok ? '✓ Synced' : '⚙ Set up sync'}
+            </span>
+          </div>
         </div>
       </div>
     </header>
     <div class="board">
-      ${sectionsHtml}
-      ${completedHtml}
-    </div>
-  `;
+      ${data.sections.map(renderSection).join('')}
+      ${done > 0 ? renderCompleted() : ''}
+    </div>`;
 
   bindEvents();
 }
 
-/* ── Section ── */
+/* ═══════════════════════════════════════════
+   SECTION
+═══════════════════════════════════════════ */
 const COLORS = { red: '#e05a4e', amber: '#d4973a', purple: '#7b6fd4', blue: '#5a8eb5' };
 
 function renderSection(section) {
@@ -187,15 +399,16 @@ function renderCard(task, section, color, isDone) {
 }
 
 function dueCls(due) {
-  if (due === 'OVERDUE')    return 'due-overdue';
-  if (due === 'This week')  return 'due-hot';
-  if (due === '31 Mar')     return 'due-soon';
+  if (due === 'OVERDUE')   return 'due-overdue';
+  if (due === 'This week') return 'due-hot';
+  if (due === '31 Mar')    return 'due-soon';
   return 'due-norm';
 }
 
-/* ── Event binding ── */
+/* ═══════════════════════════════════════════
+   EVENTS
+═══════════════════════════════════════════ */
 function bindEvents() {
-  // Task checkboxes
   document.querySelectorAll('.task-cb').forEach(cb => {
     cb.addEventListener('change', e => {
       e.stopPropagation();
@@ -206,7 +419,6 @@ function bindEvents() {
     });
   });
 
-  // Expand toggles — clicking anywhere on task-info expands, except checkbox labels
   document.querySelectorAll('[data-expand]').forEach(el => {
     el.addEventListener('click', e => {
       if (e.target.closest('.cb-wrap') || e.target.closest('.step-row')) return;
@@ -219,7 +431,6 @@ function bindEvents() {
     });
   });
 
-  // Step checkboxes
   document.querySelectorAll('.step-cb').forEach(cb => {
     cb.addEventListener('change', e => {
       e.stopPropagation();
@@ -238,17 +449,12 @@ function bindEvents() {
 
 /* ── Task completion ── */
 function markDone(id, sectionId, cardEl) {
-  // Animate card out, then update state
   cardEl.style.transition = 'opacity 0.22s ease, transform 0.22s ease';
   cardEl.style.opacity    = '0';
   cardEl.style.transform  = 'translateX(14px)';
   setTimeout(() => {
     const now = new Date();
-    state.completedTasks[id] = {
-      sectionId,
-      completedAt: formatDate(now),
-      ts: now.getTime(),
-    };
+    state.completedTasks[id] = { sectionId, completedAt: formatDate(now), ts: now.getTime() };
     save();
     render();
   }, 240);
@@ -260,19 +466,18 @@ function markUndone(id) {
   render();
 }
 
-/* ── Helpers ── */
+/* ═══════════════════════════════════════════
+   HELPERS
+═══════════════════════════════════════════ */
 function formatDate(d) {
-  const date = d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-  const time = d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
-  return date + ', ' + time;
+  return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) +
+         ', ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
 }
 
 function esc(str) {
   return String(str ?? '')
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
 
 init();
