@@ -1,5 +1,12 @@
 {
   "completedTasks": {},
-  "checkedSteps": {},
-  "expandedTasks": []
+  "checkedSteps": {
+    "9": [
+      0,
+      1
+    ]
+  },
+  "expandedTasks": [
+    9
+  ]
 }
