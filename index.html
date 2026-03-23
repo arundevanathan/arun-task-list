@@ -366,7 +366,17 @@
 
     .modal-card strong { color: #909090; font-weight: 600; }
 
-    .modal-card input[type="password"] {
+    .modal-label {
+      display: block;
+      font-size: 11px;
+      color: #606060;
+      margin-bottom: 5px;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    .modal-card input[type="password"],
+    .modal-card input[type="text"] {
       width: 100%;
       background: #111;
       border: 1px solid #2e2e2e;
@@ -378,9 +388,27 @@
       outline: none;
       margin-bottom: 14px;
       transition: border-color 0.15s;
+      box-sizing: border-box;
     }
 
-    .modal-card input[type="password"]:focus { border-color: #4caf50; }
+    .modal-card input[type="password"]:focus,
+    .modal-card input[type="text"]:focus { border-color: #4caf50; }
+
+    .bin-id-box {
+      background: #111;
+      border: 1px solid #2e2e2e;
+      border-radius: 7px;
+      padding: 10px 14px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 13px;
+      color: #4caf50;
+      word-break: break-all;
+      cursor: pointer;
+      transition: border-color 0.15s;
+      margin-bottom: 4px;
+    }
+
+    .bin-id-box:hover { border-color: #4caf50; }
 
     .modal-btns {
       display: flex;
