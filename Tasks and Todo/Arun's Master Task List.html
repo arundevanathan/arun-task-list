@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<!-- saved from url=(0068)file:///C:/Users/Arun/Downloads/Arun's%20Master%20Task%20List_2.html -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arun's Master Task List</title>
+<link href="./Arun&#39;s Master Task List_files/css2" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f0f;
+    --bg2: #161616;
+    --bg3: #1e1e1e;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --text: #e8e6e0;
+    --text2: #9a9890;
+    --text3: #5a5856;
+    --accent: #c8a96e;
+    --red: #e05a4e;
+    --red-bg: rgba(224,90,78,0.1);
+    --amber: #d4973a;
+    --amber-bg: rgba(212,151,58,0.1);
+    --green: #5a9e6f;
+    --blue: #5a8eb5;
+    --blue-bg: rgba(90,142,181,0.1);
+    --purple: #7b6fd4;
+    --purple-bg: rgba(123,111,212,0.1);
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 48px 28px 64px;
+  }
+  .container { max-width: 880px; margin: 0 auto; }
+
+  /* Header */
+  .header { margin-bottom: 32px; }
+  .eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  h1 {
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--text);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  .dateline {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--text3);
+    margin-top: 6px;
+  }
+
+  /* Stats */
+  .stats {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 36px;
+  }
+  .stat {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 999px;
+    padding: 5px 14px;
+    font-size: 12px;
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .stat strong {
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+    font-size: 13px;
+    color: var(--text);
+  }
+  .stat.alert { border-color: rgba(224,90,78,0.4); color: var(--red); }
+  .stat.alert strong { color: var(--red); }
+
+  /* Sections */
+  .section { margin-bottom: 28px; }
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding-bottom: 9px;
+    border-bottom: 0.5px solid var(--border);
+  }
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .dot-red { background: var(--red); }
+  .dot-amber { background: var(--amber); }
+  .dot-purple { background: var(--purple); }
+  .dot-blue { background: var(--blue); }
+  .section-name {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text3);
+    flex: 1;
+  }
+  .badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 3px 9px;
+    border-radius: 999px;
+    letter-spacing: 0.04em;
+  }
+  .badge-red { background: var(--red-bg); color: var(--red); border: 0.5px solid rgba(224,90,78,0.25); }
+  .badge-amber { background: var(--amber-bg); color: var(--amber); border: 0.5px solid rgba(212,151,58,0.25); }
+  .badge-purple { background: var(--purple-bg); color: var(--purple); border: 0.5px solid rgba(123,111,212,0.25); }
+  .badge-blue { background: var(--blue-bg); color: var(--blue); border: 0.5px solid rgba(90,142,181,0.25); }
+
+  /* Tasks */
+  .tasks { display: flex; flex-direction: column; gap: 5px; }
+  .task {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .task:hover { border-color: var(--border2); }
+  .task.done { opacity: 0.38; }
+  .task.done .task-title { text-decoration: line-through; color: var(--text3); }
+
+  .task-main {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    padding: 12px 14px;
+  }
+
+  /* Checkbox */
+  .cb {
+    width: 18px;
+    height: 18px;
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: transparent;
+  }
+  .cb:hover { border-color: var(--green); }
+  .cb.checked { background: var(--green); border-color: var(--green); }
+  .cb svg { display: none; }
+  .cb.checked svg { display: block; }
+
+  /* Task body */
+  .task-body { flex: 1; min-width: 0; }
+  .task-title {
+    font-size: 13.5px;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.4;
+    margin-bottom: 3px;
+  }
+  .task-desc {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.6;
+    margin-bottom: 6px;
+  }
+  .tags { display: flex; flex-wrap: wrap; gap: 4px; }
+  .tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 2px 7px;
+    border-radius: 4px;
+    border: 0.5px solid var(--border);
+    color: var(--text3);
+  }
+  .tag-red { border-color: rgba(224,90,78,0.3); color: var(--red); }
+  .tag-amber { border-color: rgba(212,151,58,0.3); color: var(--amber); }
+  .tag-blue { border-color: rgba(90,142,181,0.3); color: var(--blue); }
+  .tag-purple { border-color: rgba(123,111,212,0.3); color: var(--purple); }
+
+  .expand-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text3);
+    flex-shrink: 0;
+    padding-top: 3px;
+    user-select: none;
+    white-space: nowrap;
+    transition: color 0.15s;
+  }
+  .task:hover .expand-btn { color: var(--text2); }
+
+  /* Subtasks */
+  .subtasks {
+    display: none;
+    flex-direction: column;
+    gap: 4px;
+    padding: 0 14px 12px 43px;
+    border-top: 0.5px solid var(--border);
+    padding-top: 10px;
+  }
+  .subtasks.open { display: flex; }
+  .subtask {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.55;
+    padding: 2px 0;
+  }
+  .sub-cb {
+    width: 13px;
+    height: 13px;
+    border: 1px solid var(--border2);
+    border-radius: 3px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+  }
+  .sub-cb:hover { border-color: var(--green); }
+  .sub-cb.checked { background: var(--green); border-color: var(--green); }
+  .sub-cb.checked::after { content: '✓'; font-size: 8px; color: white; line-height: 1; }
+  .subtask.done > span { text-decoration: line-through; color: var(--text3); }
+
+  /* Footer */
+  .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 36px;
+    padding-top: 16px;
+    border-top: 0.5px solid var(--border);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--text3);
+  }
+  .progress-wrap { display: flex; align-items: center; gap: 10px; }
+  .progress-bar {
+    width: 120px;
+    height: 2px;
+    background: var(--border2);
+    border-radius: 1px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--green);
+    border-radius: 1px;
+    transition: width 0.3s;
+    width: 0%;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="eyebrow">The Gift Studio — CEO Dashboard</div>
+    <h1>Arun's Master Task List</h1>
+    <div class="dateline">FY 2025–26 close &nbsp;·&nbsp; Updated 23 Mar 2026</div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><strong id="s-total">11</strong> total tasks</div>
+    <div class="stat"><strong id="s-week">5</strong> this week</div>
+    <div class="stat"><strong id="s-done">0</strong> done</div>
+    <div class="stat alert"><strong id="s-fy">6</strong> FY-end critical</div>
+  </div>
+
+  <!-- ─── SECTION 1 ─── -->
+  <div class="section">
+    <div class="section-header">
+      <span class="dot dot-red"></span>
+      <span class="section-name">This week — urgent</span>
+      <span class="badge badge-red">FY end</span>
+    </div>
+    <div class="tasks">
+
+      <div class="task" data-id="1" onclick="toggleExpand(1)">
+        <div class="task-main">
+          <div class="cb" id="cb-1" onclick="toggleDone(event,1)">
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></polyline></svg>
+          </div>
+          <div class="task-body">
+            <div class="task-title">Revised AOP — send to Shashwat &amp; Shivika Goenka this week</div>
+            <div class="task-desc">Target revised to EBITDA neutral FY'27 (original was –₹2.5Cr loss). Verbal commitment made last week to share by this week over email. No formal meeting scheduled yet — email is the deliverable.</div>
+            <div class="tags">
+              <span class="tag tag-red">Due this week</span>
+              <span class="tag tag-amber">Finance</span>
+              <span class="tag">RPSG Ventures</span>
+              <span class="tag">Promoters</span>
+            </div>
+          </div>
+          <div class="expand-btn" id="tog-1">▾ 3</div>
+        </div>
+        <div class="subtasks" id="sub-1">
+          <div class="subtask" data-sid="1-1"><div class="sub-cb" onclick="toggleSub(event,&#39;1-1&#39;)"></div><span>Rework financial model to reach EBITDA neutral for FY'27</span></div>
+          <div class="subtask" data-sid="1-2"><div class="sub-cb" onclick="toggleSub(event,&#39;1-2&#39;)"></div><span>Validate key assumptions with finance team</span></div>
+          <div class="subtask" data-sid="1-3"><div class="sub-cb" onclick="toggleSub(event,&#39;1-3&#39;)"></div><span>Draft cover email and send to Shashwat &amp; Shivika Goenka</span></div>
+        </div>
+      </div>
+
+      <div class="task" data-id="2" onclick="toggleExpand(2)">
+        <div class="task-main">
+          <div class="cb" id="cb-2" onclick="toggleDone(event,2)">
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></polyline></svg>
+          </div>
+          <div class="task-body">
+            <div class="task-title">Month-end P&amp;L prediction — lock FY close number</div>
+            <div class="task-desc">Current range ₹8.4–8.8Cr loss. Hard constraint: B2B must land at +₹5L or better — negative B2B is not acceptable regardless of overall P&amp;L. Must close to number committed to promoters.</div>
+            <div class="tags">
+              <span class="tag tag-red">Due this week</span>
+              <span class="tag tag-amber">Finance</span>
+              <span class="tag tag-red">B2B hard floor</span>
+            </div>
+          </div>
+          <div class="expand-btn" id="tog-2">▾ 3</div>
+        </div>
+        <div class="subtasks" id="sub-2">
+          <div class="subtask" data-sid="2-1"><div class="sub-cb" onclick="toggleSub(event,&#39;2-1&#39;)"></div><span>Pull latest actuals from finance — revenue, COGS, opex by channel</span></div>
+          <div class="subtask" data-sid="2-2"><div class="sub-cb" onclick="toggleSub(event,&#39;2-2&#39;)"></div><span>Isolate B2B P&amp;L line — confirm it lands at +₹5L minimum</span></div>
+          <div class="subtask" data-sid="2-3"><div class="sub-cb" onclick="toggleSub(event,&#39;2-3&#39;)"></div><span>Align team on forecast vs commitment; escalate any gaps immediately</span></div>
+        </div>
+      </div>
+
+      <div class="task" data-id="3" onclick="toggleExpand(3)">
+        <div class="task-main">
+          <div class="cb" id="cb-3" onclick="toggleDone(event,3)">
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></polyline></svg>
+          </div>
+          <div class="task-body">
+            <div class="task-title">AR collections — detailed review and drive before FY close</div>
+            <div class="task-desc">Working capital = AR + Inventory – AP. Current AR is too high. Need granular review by client, identify overdue, and drive collections through before 31 Mar. Working capital data to be shared separately.</div>
+            <div class="tags">
+              <span class="tag tag-red">FY end critical</span>
+              <span class="tag tag-amber">Finance</span>
+              <span class="tag">Collections</span>
+              <span class="tag">Working capital</span>
+            </div>
+          </div>
+          <div class="expand-btn" id="tog-3">▾ 4</div>
+        </div>
+        <div class="subtasks" id="sub-3">
+          <div class="subtask" data-sid="3-1"><div class="sub-cb" onclick="toggleSub(event,&#39;3-1&#39;)"></div><span>Pull full AR ageing report — identify overdue by client and amount</span></div>
+          <div class="subtask" data-sid="3-2"><div class="sub-cb" onclick="toggleSub(event,&#39;3-2&#39;)"></div><span>Flag top 5 overdue accounts; initiate direct follow-up calls this week</span></div>
+          <div class="subtask" data-sid="3-3"><div class="sub-cb" onclick="toggleSub(event,&#39;3-3&#39;)"></div><span>Separate disputed items from clean receivables — distinct action plan for disputes</span></div>
+          <div class="subtask" data-sid="3-4"><div class="sub-cb" onclick="toggleSub(event,&#39;3-4&#39;)"></div><span>Set working capital target with finance and track daily until FY close</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─── SECTION 2 ─── -->
+  <div class="section">
+    <div class="section-header">
+      <span class="dot dot-amber"></span>
+      <span class="section-name">This week — FY close ops</span>
+      <span class="badge badge-amber">Before 31 Mar</span>
+    </div>
+    <div class="tasks">
+
+      <div class="task" data-id="4" onclick="toggleExpand(4)">
+        <div class="task-main">
+          <div class="cb" id="cb-4" onclick="toggleDone(event,4)">
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></polyline></svg>
+          </div>
+          <div class="task-body">
+            <div class="task-title">Nature's Basket recon — close all inter-company accounts</div>
+            <div class="task-desc">Multi-directional settlement: inventory both ways (TGS↔NB), inter-company purchases, opex/rental payables owed to NB, commission receivables owed to TGS. Finance has action steps — drive to completion before 31 Mar.</div>
+            <div class="tags">
+              <span class="tag tag-red">FY end critical</span>
+              <span class="tag tag-blue">Ops</span>
+              <span class="tag">Nature's Basket</span>
+            </div>
+          </div>
+          <div class="expand-btn" id="tog-4">▾ 4</div>
+        </div>
+        <div class="subtasks" id="sub-4">
+          <div class="subtask" data-sid="4-1"><div class="sub-cb" onclick="toggleSub(event,&#39;4-1&#39;)"></div><span>Get finance action steps list; assign owners and deadlines to each item</span></div>
+          <div class="subtask" data-sid="4-2"><div class="sub-cb" onclick="toggleSub(event,&#39;4-2&#39;)"></div><span>Reconcile inventory movements both ways (TGS→NB and NB→TGS)</span></div>
+          <div class="subtask" data-sid="4-3"><div class="sub-cb" onclick="toggleSub(event,&#39;4-3&#39;)"></div><span>Net off commission receivables vs opex/rental payables — arrive at settlement figure</span></div>
+          <div class="subtask" data-sid="4-4"><div class="sub-cb" onclick="toggleSub(event,&#39;4-4&#39;)"></div><span>Get NB sign-off on final settlement figure before FY close</span></div>
+        </div>
+      </div>
+
+      <div class="task" data-id="5" onclick="toggleExpand(5)">
+        <div class="task-main">
+          <div class="cb" id="cb-5" onclick="toggleDone(event,5)">
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></polyline></svg>
+          </div>
+          <div class="task-body">
+            <div class="task-title">Spencer's Retail recon — same structure as NB, close before 31 Mar</div>
+            <div class="task-desc">Same commission model as NB. Inventory, purchases, commissions, opex/rentals all need reconciling. Full clarity and account closure required before financial year end.</div>
+            <div class="tags">
+              <span class="tag tag-red">FY end critical</span>
+              <span class="tag tag-blue">Ops</span>
+              <span class="tag">Spencer's Retail</span>
+            </div>
+          </div>
+          <div class="expand-btn" id="tog-5">▾ 4</div>
+        </div>
+        <div class="subtasks" id="sub-5">
+          <div class="subtask" data-sid="5-1"><div class="sub-cb" onclick="toggleSub(event,&#39;5-1&#39;)"></div><span>Apply same recon framework used for NB to Spencer's accounts</span></div>
+          <div class="subtask" data-sid="5-2"><div class="sub-cb" onclick="toggleSub(event,&#39;5-2&#39;)"></div><span>Reconcile inventory, purchases, commissions and opex with SRL finance team</span></div>
+          <div class="subtask" data-sid="5-3"><div class="sub-cb" onclick="toggleSub(event,&#39;5-3&#39;)"></div><span>Identify and resolve any disputed line items</span></div>
+          <div class="subtask" data-sid="5-4"><div class="sub-cb" onclick="toggleSub(event,&#39;5-4&#39;)"></div><span>Get SRL sign-off and formally close accounts before 31 Mar</span></div>
+        </div>
+      </div>
+
+      <div class="task" data-id="6" onclick="toggleExpand(6)">
+        <div class="task-main">
+          <div class="cb" id="cb-6" onclick="toggleDone(event,6)">
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></polyline></svg>
+          </div>
+          <div class="task-body">
+            <div class="task-title">Negative inventory analysis — package and hand off to supply chain</div>
+            <div class="task-desc">System showing negative inventory across certain SKUs. Identify affected SKUs, map each to corresponding positive inventory (likely entry/transfer timing mismatches), deliver clean numbers to supply chain team for correction.</div>
+            <div class="tags">
+              <span class="tag tag-red">FY end critical</span>
+              <span class="tag tag-blue">Ops</span>
+              <span class="tag">Supply chain</span>
+              <span class="tag">Inventory</span>
+            </div>
+          </div>
+          <div class="expand-btn" id="tog-6">▾ 3</div>
+        </div>
+        <div class="subtasks" id="sub-6">
+          <div class="subtask" data-sid="6-1"><div class="sub-cb" onclick="toggleSub(event,&#39;6-1&#39;)"></div><span>Extract full negative inventory report from system by SKU and location</span></div>
+          <div class="subtask" data-sid="6-2"><div class="sub-cb" onclick="toggleSub(event,&#39;6-2&#39;)"></div><span>Map each negative SKU to its corresponding positive inventory entry</span></div>
+          <div class="subtask" data-sid="6-3"><div class="sub-cb" onclick="toggleSub(event,&#39;6-3&#39;)"></div><span>Package clean analysis and hand off to supply chain with recommended corrections</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─── SECTION 3 ─── -->
+  <div class="section">
+    <div class="section-header">
+      <span class="dot dot-purple"></span>
+      <span class="section-name">Personal — tax &amp; finance</span>
+      <span class="badge badge-purple">FY end</span>
+    </div>
+    <div class="tasks">
+
+      <div class="task" data-id="7" onclick="toggleExpand(7)">
+        <div class="task-main">
+          <div class="cb" id="cb-7" onclick="toggleDone(event,7)">
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></polyline></svg>
+          </div>
+          <div class="task-body">
+            <div class="task-title">Year-end tax planning — discuss with CA and make tax payments</div>
+            <div class="task-desc">Comprehensive year-end review with CA covering total tax liability, advance tax, and any payments due before 31 Mar.</div>
+            <div class="tags">
+              <span class="tag tag-red">FY end</span>
+              <span class="tag tag-purple">Personal</span>
+              <span class="tag">CA</span>
+            </div>
+          </div>
+          <div class="expand-btn" id="tog-7">▾ 3</div>
+        </div>
+        <div class="subtasks" id="sub-7">
+          <div class="subtask" data-sid="7-1"><div class="sub-cb" onclick="toggleSub(event,&#39;7-1&#39;)"></div><span>Schedule call/meeting with CA before 31 Mar</span></div>
+          <div class="subtask" data-sid="7-2"><div class="sub-cb" onclick="toggleSub(event,&#39;7-2&#39;)"></div><span>Review total tax liability for FY25-26 with CA</span></div>
+          <div class="subtask" data-sid="7-3"><div class="sub-cb" onclick="toggleSub(event,&#39;7-3&#39;)"></div><span>Make any outstanding advance tax payments before deadline</span></div>
+        </div>
+      </div>
+
+      <div class="task" data-id="8" onclick="toggleExpand(8)">
+        <div class="task-main">
+          <div class="cb" id="cb-8" onclick="toggleDone(event,8)">
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></polyline></svg>
+          </div>
+          <div class="task-body">
+            <div class="task-title">Submit GST invoices Jan–Mar 2026 to RPSG Ventures</div>
+            <div class="task-desc">Monthly retainer fee under contract with RPSG Ventures is exclusive of GST. Need to raise and submit 3 months of pending invoices so RPSG pays base amount and GST amount separately. Currently overdue.</div>
+            <div class="tags">
+              <span class="tag tag-red">Overdue</span>
+              <span class="tag tag-purple">Personal</span>
+              <span class="tag">GST</span>
+              <span class="tag">RPSG Ventures</span>
+            </div>
+          </div>
+          <div class="expand-btn" id="tog-8">▾ 3</div>
+        </div>
+        <div class="subtasks" id="sub-8">
+          <div class="subtask" data-sid="8-1"><div class="sub-cb" onclick="toggleSub(event,&#39;8-1&#39;)"></div><span>Raise GST invoices for Jan, Feb, Mar 2026</span></div>
+          <div class="subtask" data-sid="8-2"><div class="sub-cb" onclick="toggleSub(event,&#39;8-2&#39;)"></div><span>Submit to RPSG Ventures finance team</span></div>
+          <div class="subtask" data-sid="8-3"><div class="sub-cb" onclick="toggleSub(event,&#39;8-3&#39;)"></div><span>Confirm base amount and GST amount are paid separately as per contract</span></div>
+        </div>
+      </div>
+
+      <div class="task" data-id="9" onclick="toggleExpand(9)">
+        <div class="task-main">
+          <div class="cb" id="cb-9" onclick="toggleDone(event,9)">
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></polyline></svg>
+          </div>
+          <div class="task-body">
+            <div class="task-title">TDS correction — RPSG Ventures filed incorrect TDS showing higher income</div>
+            <div class="task-desc">RPSG Ventures TDS filing shows higher income than actually received, incorrectly inflating income in personal tax return. They need to file a correction before personal return is filed.</div>
+            <div class="tags">
+              <span class="tag tag-red">Time sensitive</span>
+              <span class="tag tag-purple">Personal</span>
+              <span class="tag">TDS</span>
+              <span class="tag">RPSG Ventures</span>
+            </div>
+          </div>
+          <div class="expand-btn" id="tog-9">▾ 3</div>
+        </div>
+        <div class="subtasks" id="sub-9">
+          <div class="subtask" data-sid="9-1"><div class="sub-cb" onclick="toggleSub(event,&#39;9-1&#39;)"></div><span>Get exact TDS mismatch figures from CA — actual received vs what was filed</span></div>
+          <div class="subtask" data-sid="9-2"><div class="sub-cb" onclick="toggleSub(event,&#39;9-2&#39;)"></div><span>Escalate to RPSG Ventures finance team to file TDS correction</span></div>
+          <div class="subtask" data-sid="9-3"><div class="sub-cb" onclick="toggleSub(event,&#39;9-3&#39;)"></div><span>Confirm correction is reflected in 26AS before filing personal return</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─── SECTION 4 ─── -->
+  <div class="section">
+    <div class="section-header">
+      <span class="dot dot-blue"></span>
+      <span class="section-name">Longer term</span>
+      <span class="badge badge-blue">Ongoing</span>
+    </div>
+    <div class="tasks">
+
+      <div class="task" data-id="10" onclick="toggleExpand(10)">
+        <div class="task-main">
+          <div class="cb" id="cb-10" onclick="toggleDone(event,10)">
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></polyline></svg>
+          </div>
+          <div class="task-body">
+            <div class="task-title">AOP FY'27 — schedule formal review meeting with promoters</div>
+            <div class="task-desc">After revised AOP email is acknowledged by Shashwat &amp; Shivika Goenka, initiate scheduling of formal review meeting. No date set yet — dependent on Task 1 being completed first.</div>
+            <div class="tags">
+              <span class="tag tag-amber">Finance</span>
+              <span class="tag">RPSG Ventures</span>
+              <span class="tag">Dependent on Task 1</span>
+            </div>
+          </div>
+          <div class="expand-btn" id="tog-10">▾ 2</div>
+        </div>
+        <div class="subtasks" id="sub-10">
+          <div class="subtask" data-sid="10-1"><div class="sub-cb" onclick="toggleSub(event,&#39;10-1&#39;)"></div><span>Confirm AOP email has been sent and acknowledged</span></div>
+          <div class="subtask" data-sid="10-2"><div class="sub-cb" onclick="toggleSub(event,&#39;10-2&#39;)"></div><span>Reach out to Shashwat / Shivika's office to schedule formal review</span></div>
+        </div>
+      </div>
+
+      <div class="task" data-id="11" onclick="toggleExpand(11)">
+        <div class="task-main">
+          <div class="cb" id="cb-11" onclick="toggleDone(event,11)">
+            <svg width="10" height="8" viewBox="0 0 10 8" fill="none"><polyline points="1,4 4,7 9,1" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"></polyline></svg>
+          </div>
+          <div class="task-body">
+            <div class="task-title">Nirvan's PAN card, bank account &amp; mutual fund setup</div>
+            <div class="task-desc">Get PAN card for Nirvan (2yr old son). Open bank account in his name to receive gifts from family and grandparents. Set up direct mutual fund account to start investing accumulated gift money rather than leaving it idle.</div>
+            <div class="tags">
+              <span class="tag tag-purple">Personal</span>
+              <span class="tag">Nirvan</span>
+              <span class="tag">Investments</span>
+            </div>
+          </div>
+          <div class="expand-btn" id="tog-11">▾ 4</div>
+        </div>
+        <div class="subtasks" id="sub-11">
+          <div class="subtask" data-sid="11-1"><div class="sub-cb" onclick="toggleSub(event,&#39;11-1&#39;)"></div><span>Apply for PAN card for Nirvan (minor PAN application with guardian details)</span></div>
+          <div class="subtask" data-sid="11-2"><div class="sub-cb" onclick="toggleSub(event,&#39;11-2&#39;)"></div><span>Open bank account in Nirvan's name (minor account with guardian)</span></div>
+          <div class="subtask" data-sid="11-3"><div class="sub-cb" onclick="toggleSub(event,&#39;11-3&#39;)"></div><span>Set up direct mutual fund account linked to his bank account</span></div>
+          <div class="subtask" data-sid="11-4"><div class="sub-cb" onclick="toggleSub(event,&#39;11-4&#39;)"></div><span>Start SIP or lump sum investment of accumulated gift money</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>The Gift Studio &nbsp;·&nbsp; FY2025-26</span>
+    <div class="progress-wrap">
+      <span id="done-label">0 / 11 done</span>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+  </div>
+
+</div>
+<script>
+  const TOTAL = 11;
+  const doneSet = new Set();
+  const subDoneSet = new Set();
+
+  function toggleDone(e, id) {
+    e.stopPropagation();
+    const task = document.querySelector('[data-id="'+id+'"]');
+    const cb = document.getElementById('cb-'+id);
+    if (doneSet.has(id)) {
+      doneSet.delete(id);
+      task.classList.remove('done');
+      cb.classList.remove('checked');
+    } else {
+      doneSet.add(id);
+      task.classList.add('done');
+      cb.classList.add('checked');
+    }
+    updateStats();
+  }
+
+  function toggleExpand(id) {
+    const sub = document.getElementById('sub-'+id);
+    const tog = document.getElementById('tog-'+id);
+    if (!sub) return;
+    const isOpen = sub.classList.contains('open');
+    sub.classList.toggle('open', !isOpen);
+    if (tog) tog.textContent = tog.textContent.replace(isOpen ? '▴' : '▾', isOpen ? '▾' : '▴');
+  }
+
+  function toggleSub(e, sid) {
+    e.stopPropagation();
+    const row = document.querySelector('[data-sid="'+sid+'"]');
+    const cb = row.querySelector('.sub-cb');
+    if (subDoneSet.has(sid)) {
+      subDoneSet.delete(sid);
+      cb.classList.remove('checked');
+      row.classList.remove('done');
+    } else {
+      subDoneSet.add(sid);
+      cb.classList.add('checked');
+      row.classList.add('done');
+    }
+  }
+
+  function updateStats() {
+    const n = doneSet.size;
+    document.getElementById('s-done').textContent = n;
+    document.getElementById('done-label').textContent = n + ' / ' + TOTAL + ' done';
+    document.getElementById('progress-fill').style.width = Math.round((n / TOTAL) * 100) + '%';
+  }
+</script>
+
+
+</body></html>
