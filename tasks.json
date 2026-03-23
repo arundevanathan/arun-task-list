@@ -1,0 +1,176 @@
+{
+  "meta": {
+    "title": "Arun's Master Task List",
+    "subtitle": "The Gift Studio — CEO | FY 2025-26",
+    "updated": "23 Mar 2026"
+  },
+  "sections": [
+    {
+      "id": "urgent",
+      "label": "This week — urgent",
+      "color": "red",
+      "badge": "FY end",
+      "tasks": [
+        {
+          "id": 1,
+          "title": "Revised AOP — send to Shashwat & Shivika Goenka",
+          "desc": "Target EBITDA neutral FY'27 (was –₹2.5Cr). Email is the deliverable this week.",
+          "tags": ["Finance", "RPSG Ventures", "Promoters"],
+          "due": "This week",
+          "steps": [
+            "Rework financial model to reach EBITDA neutral for FY'27",
+            "Validate key assumptions with finance team",
+            "Draft cover email and send to Shashwat & Shivika Goenka"
+          ]
+        },
+        {
+          "id": 2,
+          "title": "Month-end P&L — lock FY close number",
+          "desc": "Range ₹8.4–8.8Cr loss. HARD CONSTRAINT: B2B must land at +₹5L or better — negative B2B is not acceptable.",
+          "tags": ["Finance", "B2B hard floor"],
+          "due": "This week",
+          "steps": [
+            "Pull latest actuals — revenue, COGS, opex by channel",
+            "Isolate B2B P&L — confirm at +₹5L minimum",
+            "Align team on forecast vs commitment; escalate gaps immediately"
+          ]
+        },
+        {
+          "id": 3,
+          "title": "AR collections — detailed review before FY close",
+          "desc": "Working capital = AR + Inventory – AP. AR too high. Drive collections before 31 Mar.",
+          "tags": ["Finance", "Collections", "Working capital"],
+          "due": "31 Mar",
+          "steps": [
+            "Pull full AR ageing report by client and amount",
+            "Flag top 5 overdue accounts; initiate follow-up calls this week",
+            "Separate disputed items from clean receivables",
+            "Set working capital target with finance; track daily till FY close"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "fyclose",
+      "label": "This week — FY close ops",
+      "color": "amber",
+      "badge": "Before 31 Mar",
+      "tasks": [
+        {
+          "id": 4,
+          "title": "Nature's Basket recon — close all inter-company accounts",
+          "desc": "Inventory both ways (TGS↔NB), purchases, opex/rental payables to NB, commission receivables to TGS. Finance has action steps.",
+          "tags": ["Ops", "Nature's Basket"],
+          "due": "31 Mar",
+          "steps": [
+            "Get finance action steps list; assign owners and deadlines",
+            "Reconcile inventory movements both ways (TGS↔NB)",
+            "Net off commission receivables vs opex/rental payables",
+            "Get NB sign-off on final settlement figure"
+          ]
+        },
+        {
+          "id": 5,
+          "title": "Spencer's Retail recon — same structure as NB",
+          "desc": "Same commission model as NB. Inventory, purchases, commissions, opex/rentals. Full closure before FY end.",
+          "tags": ["Ops", "Spencer's Retail"],
+          "due": "31 Mar",
+          "steps": [
+            "Apply same recon framework as NB to Spencer's accounts",
+            "Reconcile inventory, purchases, commissions and opex with SRL",
+            "Identify and resolve disputed line items",
+            "Get SRL sign-off and close accounts before 31 Mar"
+          ]
+        },
+        {
+          "id": 6,
+          "title": "Negative inventory analysis — hand off to supply chain",
+          "desc": "System showing negative SKUs. Identify, map to positive inventory, deliver clean numbers to supply chain.",
+          "tags": ["Ops", "Inventory"],
+          "due": "31 Mar",
+          "steps": [
+            "Extract full negative inventory report by SKU and location",
+            "Map each negative SKU to its corresponding positive inventory entry",
+            "Package analysis and hand off to supply chain with recommendations"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "personal",
+      "label": "Personal — tax & finance",
+      "color": "purple",
+      "badge": "FY end",
+      "tasks": [
+        {
+          "id": 7,
+          "title": "Year-end tax planning — discuss with CA and make payments",
+          "desc": "Comprehensive year-end review with CA. Total liability, advance tax, payments due before 31 Mar.",
+          "tags": ["Personal", "CA"],
+          "due": "31 Mar",
+          "steps": [
+            "Schedule call/meeting with CA before 31 Mar",
+            "Review total tax liability for FY25-26",
+            "Make any outstanding advance tax payments before deadline"
+          ]
+        },
+        {
+          "id": 8,
+          "title": "Submit GST invoices Jan–Mar 2026 to RPSG Ventures",
+          "desc": "Monthly retainer exclusive of GST. Raise 3 months of pending invoices. Base and GST paid separately. Currently overdue.",
+          "tags": ["Personal", "GST", "RPSG Ventures"],
+          "due": "OVERDUE",
+          "steps": [
+            "Raise GST invoices for Jan, Feb, Mar 2026",
+            "Submit to RPSG Ventures finance team",
+            "Confirm base amount and GST paid separately per contract"
+          ]
+        },
+        {
+          "id": 9,
+          "title": "TDS correction — RPSG Ventures filed incorrect TDS",
+          "desc": "Higher income shown than received, inflating personal tax return. RPSG must file correction before return is filed.",
+          "tags": ["Personal", "TDS", "RPSG Ventures"],
+          "due": "Before filing",
+          "steps": [
+            "Get exact TDS mismatch figures from CA",
+            "Escalate to RPSG Ventures finance to file TDS correction",
+            "Confirm correction reflected in 26AS before filing return"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "longerterm",
+      "label": "Longer term",
+      "color": "blue",
+      "badge": "Ongoing",
+      "tasks": [
+        {
+          "id": 10,
+          "title": "AOP FY'27 — schedule formal review meeting with promoters",
+          "desc": "After AOP email acknowledged, schedule formal meeting with Shashwat & Shivika Goenka. Dependent on Task 1.",
+          "tags": ["Finance", "RPSG Ventures"],
+          "due": "TBD",
+          "steps": [
+            "Confirm AOP email has been sent and acknowledged",
+            "Reach out to schedule formal review meeting"
+          ]
+        },
+        {
+          "id": 11,
+          "title": "Nirvan's PAN card, bank account & mutual fund setup",
+          "desc": "Get PAN for Nirvan (2yr old). Open minor bank account, set up direct MF account, start investing accumulated gift money.",
+          "tags": ["Personal", "Nirvan", "Investments"],
+          "due": "No deadline",
+          "steps": [
+            "Apply for PAN card for Nirvan (minor PAN with guardian details)",
+            "Open bank account in Nirvan's name (minor account)",
+            "Set up direct mutual fund account linked to his bank account",
+            "Start SIP or lump sum investment of accumulated gift money"
+          ]
+        }
+      ]
+    }
+  ]
+}
