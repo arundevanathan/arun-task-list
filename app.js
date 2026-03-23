@@ -2,11 +2,9 @@
 
 /* ── Constants ── */
 const STORAGE_KEY = 'arun_board_v1';
-const TOKEN_KEY   = 'arun_board_token';
-const GH_OWNER    = 'arundevanathan';
-const GH_REPO     = 'arun-task-list';
-const GH_BRANCH   = 'main';
-const STATE_FILE  = 'state.json';
+const JB_KEY_KEY  = 'arun_jb_key';   // JSONBin master key
+const JB_BIN_KEY  = 'arun_jb_bin';   // JSONBin bin ID
+const JB_BASE     = 'https://api.jsonbin.io/v3';
 
 /* ── In-memory state ── */
 let data      = null;
@@ -43,97 +41,86 @@ async function init() {
   // 3. Render immediately with local state
   render();
 
-  // 4. Fetch remote state.json — source of truth for cross-device sync
+  // 4. Fetch remote state — source of truth for cross-device sync
   await loadRemoteState();
 }
 
 /* ═══════════════════════════════════════════
-   GITHUB SYNC
+   JSONBIN SYNC
 ═══════════════════════════════════════════ */
-function getToken() {
-  return localStorage.getItem(TOKEN_KEY) || '';
-}
+function getJbKey() { return localStorage.getItem(JB_KEY_KEY) || ''; }
+function getJbBin() { return localStorage.getItem(JB_BIN_KEY) || ''; }
 
 async function loadRemoteState() {
-  const token = getToken();
-  let remote = null;
+  const key = getJbKey();
+  const bin = getJbBin();
+  if (!key || !bin) { updateSyncPill(); return; }
 
   try {
-    if (token) {
-      // Use the GitHub API directly — bypasses CDN caching, always returns latest content
-      const res = await fetch(
-        `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${STATE_FILE}`,
-        { headers: { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' } }
-      );
-      if (res.status === 404) { updateSyncPill(); return; } // not created yet
-      if (res.status === 401 || res.status === 403) { setSyncStatus('error', 'Token invalid'); return; }
-      if (!res.ok) { updateSyncPill(); return; }
-      const info = await res.json();
-      remote = JSON.parse(atob(info.content.replace(/\s/g, '')));
-    } else {
-      // No token — raw URL (may lag by CDN cache; token needed for reliable sync)
-      const res = await fetch(
-        `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/${GH_BRANCH}/${STATE_FILE}?v=${Date.now()}`
-      );
-      if (!res.ok) { updateSyncPill(); return; }
-      remote = await res.json();
-    }
+    const res = await fetch(`${JB_BASE}/b/${bin}/latest`, {
+      headers: { 'X-Master-Key': key }
+    });
+    if (res.status === 401 || res.status === 403) { setSyncStatus('error', 'Key invalid'); return; }
+    if (res.status === 404) { updateSyncPill(); return; }
+    if (!res.ok) { updateSyncPill(); return; }
 
-    if (remote) {
-      state = Object.assign({ completedTasks: {}, checkedSteps: {}, expandedTasks: [] }, remote);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-      render();
-      setSyncStatus('synced');
-    }
+    const { record } = await res.json();
+    state = Object.assign({ completedTasks: {}, checkedSteps: {}, expandedTasks: [] }, record);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    render();
+    setSyncStatus('synced');
   } catch (e) {
     updateSyncPill();
   }
 }
 
-async function syncToGitHub() {
-  const token = getToken();
-  if (!token) { setSyncStatus('no-token'); return; }
+async function syncToJsonBin() {
+  const key = getJbKey();
+  if (!key) { setSyncStatus('no-token'); return; }
 
   setSyncStatus('syncing');
 
-  const content = btoa(JSON.stringify(state, null, 2));
+  let bin = getJbBin();
 
   try {
-    // Need current SHA to update existing file
-    let sha = null;
-    const infoRes = await fetch(
-      `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${STATE_FILE}`,
-      { headers: { Authorization: `token ${token}` } }
-    );
-    if (infoRes.ok) {
-      sha = (await infoRes.json()).sha;
-    } else if (infoRes.status === 401 || infoRes.status === 403) {
-      setSyncStatus('error', 'Token invalid or expired');
-      return;
-    }
-    // 404 = file doesn't exist yet → create it (no sha needed)
-
-    const body = { message: 'Update task state', content, branch: GH_BRANCH };
-    if (sha) body.sha = sha;
-
-    const putRes = await fetch(
-      `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${STATE_FILE}`,
-      {
+    if (!bin) {
+      // First time — create a new bin
+      const res = await fetch(`${JB_BASE}/b`, {
+        method: 'POST',
+        headers: {
+          'X-Master-Key': key,
+          'Content-Type': 'application/json',
+          'X-Bin-Name': 'arun-task-board',
+          'X-Bin-Private': 'true',
+        },
+        body: JSON.stringify(state),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setSyncStatus('error', err.message || res.status);
+        return;
+      }
+      const created = await res.json();
+      bin = created.metadata.id;
+      localStorage.setItem(JB_BIN_KEY, bin);
+      showBinCreated(bin);
+    } else {
+      // Update existing bin
+      const res = await fetch(`${JB_BASE}/b/${bin}`, {
         method: 'PUT',
         headers: {
-          Authorization: `token ${token}`,
+          'X-Master-Key': key,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(body),
+        body: JSON.stringify(state),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        setSyncStatus('error', err.message || res.status);
+        return;
       }
-    );
-
-    if (putRes.ok) {
-      setSyncStatus('synced');
-    } else {
-      const err = await putRes.json().catch(() => ({}));
-      setSyncStatus('error', err.message || putRes.status);
     }
+    setSyncStatus('synced');
   } catch (e) {
     setSyncStatus('error', e.message);
   }
@@ -141,7 +128,7 @@ async function syncToGitHub() {
 
 function scheduleSync() {
   clearTimeout(syncTimer);
-  syncTimer = setTimeout(syncToGitHub, 800);
+  syncTimer = setTimeout(syncToJsonBin, 800);
 }
 
 /* ── Sync pill UI ── */
@@ -167,13 +154,12 @@ function setSyncStatus(status, detail) {
   } else if (status === 'no-token') {
     el.textContent = '⚙ Set up sync';
   } else {
-    // idle
     el.textContent = '✓ Synced';
   }
 }
 
 function updateSyncPill() {
-  setSyncStatus(getToken() ? 'idle' : 'no-token');
+  setSyncStatus(getJbKey() ? 'idle' : 'no-token');
 }
 
 /* ── Token modal ── */
@@ -186,16 +172,21 @@ function showTokenModal(prefill) {
   overlay.innerHTML = `
     <div class="modal-card" id="modal-card">
       <h3>Cross-device sync</h3>
-      <p>Enter a GitHub personal access token with <strong>repo</strong> scope. It's stored only in this browser and used to sync your task state to GitHub so any device sees the same board.</p>
-      <input type="password" id="token-input" placeholder="ghp_…"
+      <p>Enter your <strong>JSONBin Master Key</strong> (from jsonbin.io → API Keys) and a <strong>Bin ID</strong> if syncing from another device. Keys are stored only in this browser.</p>
+      <label class="modal-label">Master Key</label>
+      <input type="password" id="jb-key-input" placeholder="$2a$10$…"
              autocomplete="off" spellcheck="false"
-             value="${esc(prefill || getToken())}">
+             value="${esc(prefill || getJbKey())}">
+      <label class="modal-label" style="margin-top:10px">Bin ID <span style="font-weight:400;opacity:.6">(leave blank to create new)</span></label>
+      <input type="text" id="jb-bin-input" placeholder="64a3f…"
+             autocomplete="off" spellcheck="false"
+             value="${esc(getJbBin())}">
       <div class="modal-btns">
         <button class="btn-primary" id="save-token-btn">Save &amp; Sync</button>
-        <button class="btn-secondary" id="clear-token-btn">Remove token</button>
+        <button class="btn-secondary" id="clear-token-btn">Remove credentials</button>
         <button class="btn-cancel" id="cancel-token-btn">Cancel</button>
       </div>
-      <p class="modal-note">Token never leaves your browser except to call the GitHub API over HTTPS.</p>
+      <p class="modal-note">Credentials never leave your browser except to call the JSONBin API over HTTPS.</p>
     </div>`;
 
   overlay.addEventListener('click', e => {
@@ -205,23 +196,64 @@ function showTokenModal(prefill) {
   document.body.appendChild(overlay);
   requestAnimationFrame(() => overlay.classList.add('open'));
 
-  document.getElementById('token-input').focus();
+  document.getElementById('jb-key-input').focus();
 
   document.getElementById('save-token-btn').addEventListener('click', () => {
-    const val = document.getElementById('token-input').value.trim();
-    if (!val) return;
-    localStorage.setItem(TOKEN_KEY, val);
+    const key = document.getElementById('jb-key-input').value.trim();
+    const bin = document.getElementById('jb-bin-input').value.trim();
+    if (!key) return;
+    localStorage.setItem(JB_KEY_KEY, key);
+    if (bin) localStorage.setItem(JB_BIN_KEY, bin);
+    else localStorage.removeItem(JB_BIN_KEY);
     closeTokenModal();
-    syncToGitHub();
+    syncToJsonBin();
   });
 
   document.getElementById('clear-token-btn').addEventListener('click', () => {
-    localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(JB_KEY_KEY);
+    localStorage.removeItem(JB_BIN_KEY);
     closeTokenModal();
     setSyncStatus('no-token');
   });
 
   document.getElementById('cancel-token-btn').addEventListener('click', closeTokenModal);
+}
+
+/* ── Show bin ID after auto-creation ── */
+function showBinCreated(binId) {
+  const existing = document.getElementById('bin-created-modal');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.id        = 'bin-created-modal';
+  overlay.className = 'modal-overlay';
+  overlay.innerHTML = `
+    <div class="modal-card">
+      <h3>Bin created ✓</h3>
+      <p>Your state is now stored on JSONBin. To sync another device, enter your Master Key <strong>and</strong> this Bin ID in the sync setup:</p>
+      <div class="bin-id-box" id="bin-id-display">${esc(binId)}</div>
+      <p class="modal-note">Tap the Bin ID to copy it.</p>
+      <div class="modal-btns">
+        <button class="btn-primary" id="bin-ok-btn">Got it</button>
+      </div>
+    </div>`;
+
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => overlay.classList.add('open'));
+
+  document.getElementById('bin-id-display').addEventListener('click', () => {
+    navigator.clipboard.writeText(binId).catch(() => {});
+    document.getElementById('bin-id-display').textContent = 'Copied!';
+    setTimeout(() => {
+      const el = document.getElementById('bin-id-display');
+      if (el) el.textContent = binId;
+    }, 1500);
+  });
+
+  document.getElementById('bin-ok-btn').addEventListener('click', () => {
+    overlay.classList.remove('open');
+    setTimeout(() => overlay.remove(), 200);
+  });
 }
 
 function closeTokenModal() {
@@ -237,9 +269,9 @@ function handleSyncPillClick() {
   if (el.className.includes('no-token')) {
     showTokenModal();
   } else if (el.className.includes('error')) {
-    syncToGitHub(); // retry
+    syncToJsonBin(); // retry
   } else {
-    showTokenModal(); // allow token update
+    showTokenModal(); // allow credential update
   }
 }
 
@@ -260,7 +292,7 @@ function render() {
   const total = data.sections.reduce((n, s) => n + s.tasks.length, 0);
   const done  = Object.keys(state.completedTasks).length;
   const pct   = total ? Math.round(done / total * 100) : 0;
-  const tok   = getToken();
+  const ready = getJbKey();
 
   document.getElementById('app').innerHTML = `
     <header class="app-header">
@@ -278,10 +310,10 @@ function render() {
           <div class="header-meta-row">
             <div class="updated-note">Updated: ${esc(data.meta.updated)}</div>
             <span id="sync-pill"
-                  class="sync-pill ${tok ? 'idle' : 'no-token'}"
+                  class="sync-pill ${ready ? 'idle' : 'no-token'}"
                   onclick="handleSyncPillClick()"
-                  title="${tok ? 'Tap to manage sync / retry' : 'Tap to set up cross-device sync'}">
-              ${tok ? '✓ Synced' : '⚙ Set up sync'}
+                  title="${ready ? 'Tap to manage sync / retry' : 'Tap to set up cross-device sync'}">
+              ${ready ? '✓ Synced' : '⚙ Set up sync'}
             </span>
           </div>
         </div>
