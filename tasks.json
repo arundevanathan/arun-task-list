@@ -1,6 +1,6 @@
 {
   "meta": {
-    "title": "Arun's Master Task List",
+    "title": "Arun's Master Task Board",
     "subtitle": "The Gift Studio — CEO | FY 2025-26",
     "updated": "23 Mar 2026"
   },
@@ -13,39 +13,39 @@
       "tasks": [
         {
           "id": 1,
-          "title": "Revised AOP — send to Shashwat & Shivika Goenka",
-          "desc": "Target EBITDA neutral FY'27 (was –₹2.5Cr). Email is the deliverable this week.",
-          "tags": ["Finance", "RPSG Ventures", "Promoters"],
-          "due": "This week",
+          "title": "AR collections — drive closure before FY end",
+          "desc": "Pull ageing, prioritise top overdue accounts, and close collections before 31 Mar.",
+          "tags": ["Finance", "Collections", "Working capital"],
+          "due": "31 Mar",
           "steps": [
-            "Rework financial model to reach EBITDA neutral for FY'27",
-            "Validate key assumptions with finance team",
-            "Draft cover email and send to Shashwat & Shivika Goenka"
+            "Pull full AR ageing by client",
+            "Identify top overdue accounts",
+            "Separate disputed vs clean receivables",
+            "Drive daily follow-ups and closures"
           ]
         },
         {
           "id": 2,
-          "title": "Month-end P&L — lock FY close number",
-          "desc": "Range ₹8.4–8.8Cr loss. HARD CONSTRAINT: B2B must land at +₹5L or better — negative B2B is not acceptable.",
-          "tags": ["Finance", "B2B hard floor"],
+          "title": "Month-end P&L — lock FY close with B2B ≥ ₹5L",
+          "desc": "Finalise FY loss and ensure B2B does not go negative.",
+          "tags": ["Finance", "P&L", "B2B"],
           "due": "This week",
           "steps": [
-            "Pull latest actuals — revenue, COGS, opex by channel",
-            "Isolate B2B P&L — confirm at +₹5L minimum",
-            "Align team on forecast vs commitment; escalate gaps immediately"
+            "Pull latest actuals across revenue, COGS, opex",
+            "Isolate B2B P&L and confirm floor",
+            "Align teams and escalate gaps"
           ]
         },
         {
           "id": 3,
-          "title": "AR collections — detailed review before FY close",
-          "desc": "Working capital = AR + Inventory – AP. AR too high. Drive collections before 31 Mar.",
-          "tags": ["Finance", "Collections", "Working capital"],
-          "due": "31 Mar",
+          "title": "FY27 AOP — rework to EBITDA neutral and send",
+          "desc": "Rework the FY27 plan to EBITDA neutral, validate assumptions, and send the updated plan.",
+          "tags": ["Finance", "AOP", "Promoters"],
+          "due": "This week",
           "steps": [
-            "Pull full AR ageing report by client and amount",
-            "Flag top 5 overdue accounts; initiate follow-up calls this week",
-            "Separate disputed items from clean receivables",
-            "Set working capital target with finance; track daily till FY close"
+            "Rework financial model",
+            "Validate assumptions with finance",
+            "Prepare and send AOP"
           ]
         }
       ]
@@ -58,117 +58,208 @@
       "tasks": [
         {
           "id": 4,
-          "title": "Nature's Basket recon — close all inter-company accounts",
-          "desc": "Inventory both ways (TGS↔NB), purchases, opex/rental payables to NB, commission receivables to TGS. Finance has action steps.",
-          "tags": ["Ops", "Nature's Basket"],
+          "title": "NBL & SVPL final settlement",
+          "desc": "Complete GRN, sales reversal, commission debit note booking, reconcile balances, and close payment.",
+          "tags": ["Ops", "Finance", "Nature's Basket", "Inter-company"],
           "due": "31 Mar",
           "steps": [
-            "Get finance action steps list; assign owners and deadlines",
-            "Reconcile inventory movements both ways (TGS↔NB)",
-            "Net off commission receivables vs opex/rental payables",
-            "Get NB sign-off on final settlement figure"
+            "Track completion of SVPL GRN of ~₹2 Cr",
+            "Track NBL reversal of sales of ~₹1.6 Cr",
+            "Track commission debit note booking by Vishal",
+            "Confirm books reconciliation post entries with Jitender",
+            "Close final settlement and update cashflow",
+            "Escalate if items stall or payment is not released"
           ]
         },
         {
           "id": 5,
-          "title": "Spencer's Retail recon — same structure as NB",
-          "desc": "Same commission model as NB. Inventory, purchases, commissions, opex/rentals. Full closure before FY end.",
-          "tags": ["Ops", "Spencer's Retail"],
+          "title": "Nature's Basket / inter-company closure",
+          "desc": "Complete full reconciliation, net off balances, and get sign-off.",
+          "tags": ["Ops", "Nature's Basket", "Inter-company"],
           "due": "31 Mar",
           "steps": [
-            "Apply same recon framework as NB to Spencer's accounts",
-            "Reconcile inventory, purchases, commissions and opex with SRL",
-            "Identify and resolve disputed line items",
-            "Get SRL sign-off and close accounts before 31 Mar"
+            "Complete full reconciliation",
+            "Net off balances",
+            "Get final sign-off"
           ]
         },
         {
           "id": 6,
-          "title": "Negative inventory analysis — hand off to supply chain",
-          "desc": "System showing negative SKUs. Identify, map to positive inventory, deliver clean numbers to supply chain.",
-          "tags": ["Ops", "Inventory"],
+          "title": "Remaining collections — follow-up",
+          "desc": "Close any outstanding receivables beyond the core AR push.",
+          "tags": ["Finance", "Collections"],
           "due": "31 Mar",
           "steps": [
-            "Extract full negative inventory report by SKU and location",
-            "Map each negative SKU to its corresponding positive inventory entry",
-            "Package analysis and hand off to supply chain with recommendations"
+            "Get ageing / customer-wise outstanding",
+            "Prioritise high-value and delayed items",
+            "Drive closure or escalation"
           ]
+        }
+      ]
+    },
+    {
+      "id": "active",
+      "label": "Active business tasks",
+      "color": "blue",
+      "badge": "Ongoing",
+      "tasks": [
+        {
+          "id": 7,
+          "title": "Year-end relationship gifting",
+          "desc": "Execute final curation and dispatch.",
+          "tags": ["Gifting", "Execution"],
+          "due": "Active",
+          "steps": [
+            "Finalise SKUs",
+            "Finalise quantities",
+            "Take approvals",
+            "Trigger execution"
+          ]
+        },
+        {
+          "id": 8,
+          "title": "USA Rakhi plan",
+          "desc": "Finalise assortment, quantities, and logistics via Credible / Shveta.",
+          "tags": ["USA", "Rakhi", "Logistics"],
+          "due": "Active",
+          "steps": [
+            "Finalise assortment and quantities",
+            "Lock timelines and shipping plan",
+            "Hand over to Credible for execution"
+          ]
+        },
+        {
+          "id": 9,
+          "title": "Team offsite — date lock and planning",
+          "desc": "Lock dates and outline agenda, format, location, and budget.",
+          "tags": ["Team", "Offsite", "Planning"],
+          "due": "Active",
+          "steps": [
+            "Shortlist dates with team",
+            "Decide format",
+            "Identify location and budget"
+          ]
+        },
+        {
+          "id": 10,
+          "title": "Offline retail efficiency",
+          "desc": "Drive ongoing improvements in manpower, VM, assortment, shrinkage, and store profitability.",
+          "tags": ["Retail", "Store Ops", "Profitability"],
+          "due": "Ongoing",
+          "steps": [
+            "Review manpower efficiency",
+            "Review VM and assortment quality",
+            "Track shrinkage issues",
+            "Improve store profitability"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "parked",
+      "label": "Parked",
+      "color": "gray",
+      "badge": "Not active",
+      "tasks": [
+        {
+          "id": 11,
+          "title": "Shivan & Naresh collaboration",
+          "desc": "Collaboration discussion is parked for now.",
+          "tags": ["Collaboration", "Parked"],
+          "due": "TBD",
+          "steps": []
+        },
+        {
+          "id": 12,
+          "title": "Wishlink Nano-Influencer Pilot",
+          "desc": "Not a priority currently; revisit when bandwidth and model clarity improve.",
+          "tags": ["Marketing", "Pilot", "Parked"],
+          "due": "TBD",
+          "steps": []
         }
       ]
     },
     {
       "id": "personal",
-      "label": "Personal — tax & finance",
+      "label": "Personal — active",
       "color": "purple",
-      "badge": "FY end",
+      "badge": "Admin",
       "tasks": [
         {
-          "id": 7,
-          "title": "Year-end tax planning — discuss with CA and make payments",
-          "desc": "Comprehensive year-end review with CA. Total liability, advance tax, payments due before 31 Mar.",
-          "tags": ["Personal", "CA"],
-          "due": "31 Mar",
+          "id": 13,
+          "title": "Car-related paperwork (RC & Driving Licence)",
+          "desc": "Complete vehicle and licence documentation clean-up.",
+          "tags": ["Personal", "Admin", "Vehicle"],
+          "due": "Pending",
           "steps": [
-            "Schedule call/meeting with CA before 31 Mar",
-            "Review total tax liability for FY25-26",
-            "Make any outstanding advance tax payments before deadline"
+            "Locate RC and Driving Licence",
+            "Remove hypothecation from RC",
+            "Update RC address",
+            "Renew / re-issue licences"
           ]
         },
         {
-          "id": 8,
-          "title": "Submit GST invoices Jan–Mar 2026 to RPSG Ventures",
-          "desc": "Monthly retainer exclusive of GST. Raise 3 months of pending invoices. Base and GST paid separately. Currently overdue.",
-          "tags": ["Personal", "GST", "RPSG Ventures"],
-          "due": "OVERDUE",
+          "id": 14,
+          "title": "Send tax documents to YourCFO (Sep onwards)",
+          "desc": "Collect, clean, and share statements and provide Spark Receipt access.",
+          "tags": ["Personal", "Tax", "Finance"],
+          "due": "Pending",
           "steps": [
-            "Raise GST invoices for Jan, Feb, Mar 2026",
-            "Submit to RPSG Ventures finance team",
-            "Confirm base amount and GST paid separately per contract"
-          ]
-        },
-        {
-          "id": 9,
-          "title": "TDS correction — RPSG Ventures filed incorrect TDS",
-          "desc": "Higher income shown than received, inflating personal tax return. RPSG must file correction before return is filed.",
-          "tags": ["Personal", "TDS", "RPSG Ventures"],
-          "due": "Before filing",
-          "steps": [
-            "Get exact TDS mismatch figures from CA",
-            "Escalate to RPSG Ventures finance to file TDS correction",
-            "Confirm correction reflected in 26AS before filing return"
+            "Collect credit card statements",
+            "Mark personal expenses",
+            "Share cleaned documents",
+            "Provide Spark Receipt access"
           ]
         }
       ]
     },
     {
-      "id": "longerterm",
-      "label": "Longer term",
-      "color": "blue",
-      "badge": "Ongoing",
+      "id": "personal_parked",
+      "label": "Personal — parked",
+      "color": "slate",
+      "badge": "No immediate action",
       "tasks": [
         {
-          "id": 10,
-          "title": "AOP FY'27 — schedule formal review meeting with promoters",
-          "desc": "After AOP email acknowledged, schedule formal meeting with Shashwat & Shivika Goenka. Dependent on Task 1.",
-          "tags": ["Finance", "RPSG Ventures"],
+          "id": 15,
+          "title": "GST — RPSG Group (Maitrayee)",
+          "desc": "Payments received till Dec 2025.",
+          "tags": ["Personal", "GST", "Completed"],
+          "due": "Closed",
+          "steps": []
+        },
+        {
+          "id": 16,
+          "title": "Unitech Flat (Delhi)",
+          "desc": "Parked legacy matter.",
+          "tags": ["Personal", "Property", "Parked"],
           "due": "TBD",
+          "steps": []
+        },
+        {
+          "id": 17,
+          "title": "Gyan's Wedding — Trip Planning",
+          "desc": "Parked for now.",
+          "tags": ["Personal", "Travel", "Parked"],
+          "due": "TBD",
+          "steps": []
+        },
+        {
+          "id": 18,
+          "title": "Delink Mebel's Mobile Number",
+          "desc": "Completed; only final bill verification remains if needed.",
+          "tags": ["Personal", "Admin", "Completed"],
+          "due": "Closed",
           "steps": [
-            "Confirm AOP email has been sent and acknowledged",
-            "Reach out to schedule formal review meeting"
+            "Verify final bill"
           ]
         },
         {
-          "id": 11,
-          "title": "Nirvan's PAN card, bank account & mutual fund setup",
-          "desc": "Get PAN for Nirvan (2yr old). Open minor bank account, set up direct MF account, start investing accumulated gift money.",
-          "tags": ["Personal", "Nirvan", "Investments"],
-          "due": "No deadline",
-          "steps": [
-            "Apply for PAN card for Nirvan (minor PAN with guardian details)",
-            "Open bank account in Nirvan's name (minor account)",
-            "Set up direct mutual fund account linked to his bank account",
-            "Start SIP or lump sum investment of accumulated gift money"
-          ]
+          "id": 19,
+          "title": "Update Ishita's Aadhaar Address",
+          "desc": "Completed successfully.",
+          "tags": ["Personal", "Admin", "Completed"],
+          "due": "Closed",
+          "steps": []
         }
       ]
     }
