@@ -6,8 +6,9 @@ const JB_BIN_ID   = '69c11b4ab7ec241ddc94b477';
 const JB_BASE     = 'https://api.jsonbin.io/v3';
 
 /* ── In-memory state ── */
-let data      = null;
-let syncTimer = null;
+let data        = null;
+let syncTimer   = null;
+const POLL_MS   = 15000; // poll remote every 15 seconds
 
 let state = {
   completedTasks: {}, // { taskId: { completedAt, sectionId, ts } }
@@ -42,6 +43,12 @@ async function init() {
 
   // 4. Fetch remote state — source of truth for cross-device sync
   await loadRemoteState();
+
+  // 5. Poll for remote changes so other devices stay in sync automatically
+  setInterval(async () => {
+    if (syncTimer) return; // skip if a local write is still pending
+    await loadRemoteState();
+  }, POLL_MS);
 }
 
 /* ═══════════════════════════════════════════
@@ -53,6 +60,8 @@ async function loadRemoteState() {
     if (!res.ok) { setSyncStatus('error'); return; }
 
     const { record } = await res.json();
+    const incoming = JSON.stringify(record);
+    if (incoming === JSON.stringify(state)) return; // nothing changed
     state = Object.assign({ completedTasks: {}, checkedSteps: {}, expandedTasks: [] }, record);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
     render();
