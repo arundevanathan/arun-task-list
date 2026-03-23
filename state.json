@@ -1,7 +1,10 @@
 {
   "completedTasks": {},
   "checkedSteps": {
-    "9": []
+    "9": [
+      0,
+      1
+    ]
   },
   "expandedTasks": [
     7,
