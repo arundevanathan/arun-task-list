@@ -10,4 +10,8 @@
 
 ## Done
 
-- [ ] Move completed tasks here.
+- [x] Move completed tasks here.
+
+<!--stackedit_data:
+eyJoaXN0b3J5IjpbLTI5NTQ2ODU2Nl19
+-->
