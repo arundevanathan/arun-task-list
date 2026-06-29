@@ -4,40 +4,214 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Task Board</title>
-    <link rel="stylesheet" href="public/styles.css">
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f7f5f0;
+        --panel: #ffffff;
+        --ink: #202124;
+        --muted: #646a73;
+        --line: #d8d1c7;
+        --accent: #176f68;
+        --shadow: 0 10px 24px rgba(32, 33, 36, 0.08);
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      main {
+        width: min(860px, calc(100vw - 32px));
+        margin: 0 auto;
+        padding: 34px 0;
+      }
+
+      header {
+        margin-bottom: 18px;
+      }
+
+      .eyebrow {
+        margin: 0 0 4px;
+        color: var(--muted);
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3 {
+        letter-spacing: 0;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(1.9rem, 5vw, 3rem);
+      }
+
+      article {
+        min-height: 420px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        box-shadow: var(--shadow);
+        padding: 24px 28px;
+        line-height: 1.6;
+      }
+
+      article h1,
+      article h2,
+      article h3 {
+        margin: 1.1em 0 0.45em;
+      }
+
+      article h1:first-child,
+      article h2:first-child,
+      article h3:first-child {
+        margin-top: 0;
+      }
+
+      article ul {
+        padding-left: 1.4rem;
+      }
+
+      article li {
+        margin: 0.35rem 0;
+      }
+
+      article code {
+        border-radius: 4px;
+        background: #eef1ef;
+        padding: 0.1rem 0.25rem;
+        font-family: Consolas, "Liberation Mono", monospace;
+      }
+
+      input[type="checkbox"] {
+        margin-right: 0.35rem;
+      }
+
+      .task-complete {
+        color: var(--muted);
+        text-decoration: line-through;
+      }
+
+      .status {
+        color: var(--muted);
+      }
+    </style>
   </head>
   <body>
-    <main class="app-shell">
-      <header class="topbar">
-        <div>
-          <p class="eyebrow">Markdown File</p>
-          <h1>Task Board</h1>
-        </div>
-        <div class="actions">
-          <a class="button-link" href="https://github.com/arundevanathan/arun-task-list/edit/main/TASK_BOARD.md">GitHub</a>
-          <button id="reloadButton" type="button">Reload</button>
-          <button id="saveButton" class="primary" type="button">Save</button>
-        </div>
+    <main>
+      <header>
+        <p class="eyebrow">Markdown File</p>
+        <h1>Task Board</h1>
       </header>
 
-      <section class="workspace" aria-label="Task board editor">
-        <div class="pane">
-          <div class="pane-header">
-            <h2>Editor</h2>
-            <span id="saveState" class="status">Loading...</span>
-          </div>
-          <textarea id="editor" spellcheck="true" aria-label="Task board markdown"></textarea>
-        </div>
-
-        <div class="pane preview-pane">
-          <div class="pane-header">
-            <h2>Preview</h2>
-          </div>
-          <article id="preview" class="preview"></article>
-        </div>
-      </section>
+      <article id="taskBoard" aria-live="polite">
+        <p class="status">Loading task board...</p>
+      </article>
     </main>
 
-    <script src="public/app.js"></script>
+    <script>
+      const taskBoard = document.querySelector("#taskBoard");
+
+      function escapeHtml(value) {
+        return value
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function renderInline(markdown) {
+        return escapeHtml(markdown)
+          .replace(/`([^`]+)`/g, "<code>$1</code>")
+          .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+          .replace(/\*([^*]+)\*/g, "<em>$1</em>");
+      }
+
+      function renderMarkdown(markdown) {
+        const lines = markdown.split(/\r?\n/);
+        const html = [];
+        let inList = false;
+
+        function closeList() {
+          if (inList) {
+            html.push("</ul>");
+            inList = false;
+          }
+        }
+
+        for (const line of lines) {
+          if (!line.trim()) {
+            closeList();
+            continue;
+          }
+
+          const heading = line.match(/^(#{1,3})\s+(.+)$/);
+          if (heading) {
+            closeList();
+            html.push(`<h${heading[1].length}>${renderInline(heading[2])}</h${heading[1].length}>`);
+            continue;
+          }
+
+          const task = line.match(/^-\s+\[( |x|X)\]\s+(.+)$/);
+          if (task) {
+            if (!inList) {
+              html.push("<ul>");
+              inList = true;
+            }
+
+            const checked = task[1].toLowerCase() === "x";
+            const className = checked ? ' class="task-complete"' : "";
+            const checkbox = `<input type="checkbox" disabled${checked ? " checked" : ""}>`;
+            html.push(`<li${className}>${checkbox}${renderInline(task[2])}</li>`);
+            continue;
+          }
+
+          const bullet = line.match(/^-\s+(.+)$/);
+          if (bullet) {
+            if (!inList) {
+              html.push("<ul>");
+              inList = true;
+            }
+
+            html.push(`<li>${renderInline(bullet[1])}</li>`);
+            continue;
+          }
+
+          closeList();
+          html.push(`<p>${renderInline(line)}</p>`);
+        }
+
+        closeList();
+        return html.join("");
+      }
+
+      fetch("TASK_BOARD.md", { cache: "no-store" })
+        .then((response) => {
+          if (!response.ok) {
+            throw new Error("Could not load TASK_BOARD.md.");
+          }
+
+          return response.text();
+        })
+        .then((markdown) => {
+          taskBoard.innerHTML = renderMarkdown(markdown);
+        })
+        .catch((error) => {
+          taskBoard.innerHTML = `<p class="status">${escapeHtml(error.message)}</p>`;
+        });
+    </script>
   </body>
 </html>
