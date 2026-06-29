@@ -25,26 +25,14 @@
         min-height: 100vh;
         background: var(--bg);
         color: var(--ink);
+        font-size: 14px;
         font-family: Arial, Helvetica, sans-serif;
       }
 
       main {
-        width: min(860px, calc(100vw - 32px));
+        width: min(1020px, calc(100vw - 24px));
         margin: 0 auto;
-        padding: 34px 0;
-      }
-
-      header {
-        margin-bottom: 18px;
-      }
-
-      .eyebrow {
-        margin: 0 0 4px;
-        color: var(--muted);
-        font-size: 0.78rem;
-        font-weight: 700;
-        letter-spacing: 0.08em;
-        text-transform: uppercase;
+        padding: 12px 0;
       }
 
       h1,
@@ -55,23 +43,22 @@
 
       h1 {
         margin: 0;
-        font-size: clamp(1.9rem, 5vw, 3rem);
+        font-size: 2rem;
       }
 
       article {
-        min-height: 420px;
         border: 1px solid var(--line);
         border-radius: 8px;
         background: var(--panel);
-        box-shadow: var(--shadow);
-        padding: 24px 28px;
-        line-height: 1.6;
+        box-shadow: 0 4px 14px rgba(32, 33, 36, 0.06);
+        padding: 18px 22px;
+        line-height: 1.38;
       }
 
       article h1,
       article h2,
       article h3 {
-        margin: 1.1em 0 0.45em;
+        margin: 0.8em 0 0.35em;
       }
 
       article h1:first-child,
@@ -80,12 +67,29 @@
         margin-top: 0;
       }
 
+      article h1 {
+        font-size: 1.8rem;
+      }
+
+      article h2 {
+        font-size: 1.25rem;
+      }
+
+      article h3 {
+        font-size: 1.05rem;
+      }
+
+      article p {
+        margin: 0.55rem 0;
+      }
+
       article ul {
         padding-left: 1.4rem;
+        margin: 0.45rem 0 0.75rem;
       }
 
       article li {
-        margin: 0.35rem 0;
+        margin: 0.2rem 0;
       }
 
       article li.task-item {
@@ -98,7 +102,7 @@
 
       article hr {
         height: 1px;
-        margin: 2rem 0;
+        margin: 1rem 0;
         border: 0;
         background: var(--line);
       }
@@ -106,19 +110,19 @@
       .table-wrap {
         width: 100%;
         overflow-x: auto;
-        margin: 1rem 0 1.4rem;
+        margin: 0.65rem 0 1rem;
       }
 
       table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 0.95rem;
+        font-size: 0.9rem;
       }
 
       th,
       td {
         border-bottom: 1px solid var(--line);
-        padding: 0.65rem 0.75rem;
+        padding: 0.38rem 0.5rem;
         text-align: left;
         vertical-align: top;
       }
@@ -137,6 +141,8 @@
 
       input[type="checkbox"] {
         margin-right: 0.35rem;
+        width: 0.85rem;
+        height: 0.85rem;
       }
 
       .task-complete {
@@ -151,11 +157,6 @@
   </head>
   <body>
     <main>
-      <header>
-        <p class="eyebrow">Markdown File</p>
-        <h1>Task Board</h1>
-      </header>
-
       <article id="taskBoard" aria-live="polite">
         <p class="status">Loading task board...</p>
       </article>
