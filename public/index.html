@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Task Board</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Markdown File</p>
+          <h1>Task Board</h1>
+        </div>
+        <div class="actions">
+          <a class="button-link" href="https://github.com/arundevanathan/arun-task-list/edit/main/TASK_BOARD.md">GitHub</a>
+          <button id="reloadButton" type="button">Reload</button>
+          <button id="saveButton" class="primary" type="button">Save</button>
+        </div>
+      </header>
+
+      <section class="workspace" aria-label="Task board editor">
+        <div class="pane">
+          <div class="pane-header">
+            <h2>Editor</h2>
+            <span id="saveState" class="status">Loading...</span>
+          </div>
+          <textarea id="editor" spellcheck="true" aria-label="Task board markdown"></textarea>
+        </div>
+
+        <div class="pane preview-pane">
+          <div class="pane-header">
+            <h2>Preview</h2>
+          </div>
+          <article id="preview" class="preview"></article>
+        </div>
+      </section>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
