@@ -88,6 +88,46 @@
         margin: 0.35rem 0;
       }
 
+      article li.task-item {
+        list-style: none;
+      }
+
+      article li.task-item input {
+        margin-left: -1.4rem;
+      }
+
+      article hr {
+        height: 1px;
+        margin: 2rem 0;
+        border: 0;
+        background: var(--line);
+      }
+
+      .table-wrap {
+        width: 100%;
+        overflow-x: auto;
+        margin: 1rem 0 1.4rem;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.95rem;
+      }
+
+      th,
+      td {
+        border-bottom: 1px solid var(--line);
+        padding: 0.65rem 0.75rem;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: #f3f5f2;
+        font-weight: 700;
+      }
+
       article code {
         border-radius: 4px;
         background: #eef1ef;
@@ -137,7 +177,79 @@
         return escapeHtml(markdown)
           .replace(/`([^`]+)`/g, "<code>$1</code>")
           .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+          .replace(/__([^_]+)__/g, "<strong>$1</strong>")
+          .replace(/_([^_]+)_/g, "<em>$1</em>")
           .replace(/\*([^*]+)\*/g, "<em>$1</em>");
+      }
+
+      function isTableSeparator(line) {
+        return /^\s*\|?\s*:?-{3,}:?\s*(\|\s*:?-{3,}:?\s*)+\|?\s*$/.test(line);
+      }
+
+      function isTableRow(line) {
+        return line.trim().startsWith("|") && line.trim().endsWith("|");
+      }
+
+      function parseTableCells(line) {
+        return line
+          .trim()
+          .replace(/^\|/, "")
+          .replace(/\|$/, "")
+          .split("|")
+          .map((cell) => cell.trim());
+      }
+
+      function parseAlignments(separatorLine) {
+        return parseTableCells(separatorLine).map((cell) => {
+          const left = cell.startsWith(":");
+          const right = cell.endsWith(":");
+
+          if (left && right) {
+            return "center";
+          }
+
+          if (right) {
+            return "right";
+          }
+
+          return "left";
+        });
+      }
+
+      function renderTable(lines, startIndex) {
+        const headers = parseTableCells(lines[startIndex]);
+        const alignments = parseAlignments(lines[startIndex + 1]);
+        const rows = [];
+        let index = startIndex + 2;
+
+        while (index < lines.length && isTableRow(lines[index])) {
+          rows.push(parseTableCells(lines[index]));
+          index += 1;
+        }
+
+        const head = headers
+          .map((header, cellIndex) => {
+            const align = alignments[cellIndex] || "left";
+            return `<th style="text-align: ${align}">${renderInline(header)}</th>`;
+          })
+          .join("");
+        const body = rows
+          .map((row) => {
+            const cells = headers
+              .map((_, cellIndex) => {
+                const align = alignments[cellIndex] || "left";
+                return `<td style="text-align: ${align}">${renderInline(row[cellIndex] || "")}</td>`;
+              })
+              .join("");
+
+            return `<tr>${cells}</tr>`;
+          })
+          .join("");
+
+        return {
+          html: `<div class="table-wrap"><table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table></div>`,
+          nextIndex: index
+        };
       }
 
       function renderMarkdown(markdown) {
@@ -152,9 +264,25 @@
           }
         }
 
-        for (const line of lines) {
+        for (let index = 0; index < lines.length; index += 1) {
+          const line = lines[index];
+
           if (!line.trim()) {
             closeList();
+            continue;
+          }
+
+          if (/^\s*-{3,}\s*$/.test(line)) {
+            closeList();
+            html.push("<hr>");
+            continue;
+          }
+
+          if (isTableRow(line) && index + 1 < lines.length && isTableSeparator(lines[index + 1])) {
+            closeList();
+            const table = renderTable(lines, index);
+            html.push(table.html);
+            index = table.nextIndex - 1;
             continue;
           }
 
@@ -173,7 +301,7 @@
             }
 
             const checked = task[1].toLowerCase() === "x";
-            const className = checked ? ' class="task-complete"' : "";
+            const className = checked ? ' class="task-item task-complete"' : ' class="task-item"';
             const checkbox = `<input type="checkbox" disabled${checked ? " checked" : ""}>`;
             html.push(`<li${className}>${checkbox}${renderInline(task[2])}</li>`);
             continue;
